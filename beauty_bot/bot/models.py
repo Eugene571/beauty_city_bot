@@ -60,12 +60,12 @@ class Schedule(models.Model):
 
 
 class Client(models.Model):
-    name = models.CharField(max_length=255, blank=True, null=True)
-    phone_number = models.CharField(max_length=20, unique=True)
-    email = models.EmailField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    loyalty_points = models.PositiveIntegerField(default=0)
+    name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Имя клиента")
+    phone_number = models.CharField(max_length=20, unique=True, verbose_name="Номер телефона")
+    email = models.EmailField(blank=True, null=True, verbose_name="Электронная почта")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+    loyalty_points = models.PositiveIntegerField(default=0, verbose_name="Бонусные баллы")
 
     class Meta:
         verbose_name = "Клиент"
@@ -76,22 +76,30 @@ class Client(models.Model):
 
 
 class Booking(models.Model):
-    client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='bookings')
-    schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE, related_name='bookings')
-    procedure = models.ForeignKey('Procedure', on_delete=models.CASCADE, related_name='bookings')
+    client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='bookings', verbose_name="Клиент")
+    schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE, related_name='bookings',
+                                 verbose_name="Расписание")
+    procedure = models.ForeignKey('Procedure', on_delete=models.CASCADE, related_name='bookings',
+                                  verbose_name="Процедура")
     status = models.CharField(
         max_length=20,
         choices=[('pending', 'Ожидает'), ('confirmed', 'Подтверждена'), ('cancelled', 'Отменена')],
-        default='pending'
+        default='pending',
+        verbose_name="Статус записи"
     )
     payment_status = models.CharField(
         max_length=20,
         choices=[('unpaid', 'Не оплачено'), ('paid', 'Оплачено')],
-        default='unpaid'
+        default='unpaid',
+        verbose_name="Статус оплаты"
     )
-    feedback = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    feedback = models.TextField(blank=True, null=True, verbose_name="Отзыв")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    class Meta:
+        verbose_name = "Запись"
+        verbose_name_plural = "Записи"
 
     def __str__(self):
         return f"{self.procedure} для {self.client} ({self.schedule.date})"
