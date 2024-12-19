@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import models
 
 
@@ -42,7 +43,8 @@ class Salon(models.Model):
 
 class Schedule(models.Model):
     salon = models.ForeignKey(Salon, on_delete=models.CASCADE, verbose_name="Салон", related_name="schedules")
-    specialist = models.ForeignKey('Specialist', on_delete=models.CASCADE, verbose_name="Специалист", related_name="schedules")
+    specialist = models.ForeignKey('Specialist', on_delete=models.CASCADE, verbose_name="Специалист",
+                                   related_name="schedules")
     # задел для связки с моделью специалиста
     date = models.DateField(verbose_name="Дата")
     start_time = models.TimeField(verbose_name="Время начала")
@@ -55,3 +57,41 @@ class Schedule(models.Model):
 
     def __str__(self):
         return f"{self.specialist} - {self.date} ({self.start_time} - {self.end_time})"
+
+
+class Client(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    phone_number = models.CharField(max_length=20, unique=True)
+    email = models.EmailField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    loyalty_points = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        verbose_name = "Клиент"
+        verbose_name_plural = "Клиенты"
+
+    def __str__(self):
+        return self.name or self.phone_number
+
+
+class Booking(models.Model):
+    client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='bookings')
+    schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE, related_name='bookings')
+    procedure = models.ForeignKey('Procedure', on_delete=models.CASCADE, related_name='bookings')
+    status = models.CharField(
+        max_length=20,
+        choices=[('pending', 'Ожидает'), ('confirmed', 'Подтверждена'), ('cancelled', 'Отменена')],
+        default='pending'
+    )
+    payment_status = models.CharField(
+        max_length=20,
+        choices=[('unpaid', 'Не оплачено'), ('paid', 'Оплачено')],
+        default='unpaid'
+    )
+    feedback = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.procedure} для {self.client} ({self.schedule.date})"
