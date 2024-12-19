@@ -12,6 +12,18 @@ class Specialist(models.Model):
         return self.name
 
 
+class Procedure(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Название процедуры")
+    price = models.FloatField(verbose_name="Цена")
+
+    class Meta:
+        verbose_name = "Процедура"
+        verbose_name_plural = "Процедуры"
+
+    def __str__(self):
+        return f"{self.name} - {self.price} руб."
+
+
 class Salon(models.Model):
     name = models.CharField(max_length=255, verbose_name="Название салона")
     address = models.TextField(verbose_name="Адрес")
