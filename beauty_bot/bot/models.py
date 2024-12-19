@@ -4,6 +4,10 @@ from django.db import models
 
 class Specialist(models.Model):
     name = models.CharField(max_length=150, verbose_name="Имя мастера")
+    specialization = models.CharField(max_length=100, blank=True, verbose_name="Специализация")
+    phone = models.CharField(max_length=20, blank=True, verbose_name="Телефон")
+    email = models.EmailField(blank=True, verbose_name="Электронная почта")
+    procedures = models.ManyToManyField('Procedure', blank=True, related_name="specialists", verbose_name="Процедуры")
 
     class Meta:
         verbose_name = "Мастер"
@@ -44,8 +48,7 @@ class Salon(models.Model):
 class Schedule(models.Model):
     salon = models.ForeignKey(Salon, on_delete=models.CASCADE, verbose_name="Салон", related_name="schedules")
     specialist = models.ForeignKey('Specialist', on_delete=models.CASCADE, verbose_name="Специалист",
-                                   related_name="schedules")
-    # задел для связки с моделью специалиста
+                                    related_name="schedules")
     date = models.DateField(verbose_name="Дата")
     start_time = models.TimeField(verbose_name="Время начала")
     end_time = models.TimeField(verbose_name="Время окончания")
@@ -57,6 +60,10 @@ class Schedule(models.Model):
 
     def __str__(self):
         return f"{self.specialist} - {self.date} ({self.start_time} - {self.end_time})"
+
+    def clean(self):
+        if self.end_time <= self.start_time:
+            raise ValidationError("Время окончания должно быть позже времени начала.")
 
 
 class Client(models.Model):
@@ -100,6 +107,7 @@ class Booking(models.Model):
     class Meta:
         verbose_name = "Запись"
         verbose_name_plural = "Записи"
+        unique_together = ('schedule', 'procedure', 'client')
 
     def __str__(self):
         return f"{self.procedure} для {self.client} ({self.schedule.date})"

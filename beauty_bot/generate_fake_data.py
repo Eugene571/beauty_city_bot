@@ -1,6 +1,12 @@
 from faker import Faker
-from bot.models import Salon, Specialist
 
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'beauty_bot.settings')
+django.setup()
+
+from bot.models import Salon, Specialist
 
 fake = Faker('ru_RU')
 
