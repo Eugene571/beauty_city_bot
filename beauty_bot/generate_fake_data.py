@@ -22,6 +22,7 @@ for _ in range(5):
     )
 
 for _ in range(10):
-    Specialist.objects.create(name=fake.name())
+    Specialist.objects.create(name=fake.name(),)
+
 
 print("Случайные данные сгенерированы.")

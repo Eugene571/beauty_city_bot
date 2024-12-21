@@ -1,9 +1,25 @@
 from django.contrib import admin
-from .models import Salon, Schedule, Specialist, Client, Booking
+from .models import Salon, Schedule, Specialist, Client, Booking, Procedure
 
-admin.site.register(Salon)
 admin.site.register(Schedule)
-admin.site.register(Specialist)
+
+
+@admin.register(Procedure)
+class ProcedureAdmin(admin.ModelAdmin):
+    list_display = ('name', 'price')
+    search_fields = ('name', 'price')
+
+
+@admin.register(Specialist)
+class SpecialistAdmin(admin.ModelAdmin):
+    list_display = ('name', 'specialization', 'phone')
+    search_fields = ('name', 'specialization', 'phone')
+
+
+@admin.register(Salon)
+class SalonAdmin(admin.ModelAdmin):
+    list_display = ('name', 'address', 'phone', 'opening_time', 'closing_time')
+    search_fields = ('name', 'phone')
 
 
 @admin.register(Client)
