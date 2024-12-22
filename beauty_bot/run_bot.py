@@ -1,7 +1,13 @@
+
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'beauty_bot.settings')
+django.setup()
+
 from environs import Env
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, CallbackQueryHandler, MessageHandler, Filters
-
 from handlers import button_handler, phone_handler
 
 env = Env()

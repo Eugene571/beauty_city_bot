@@ -11,7 +11,7 @@ from bot.models import Salon, Specialist
 fake = Faker('ru_RU')
 
 
-for _ in range(5):
+for _ in range(3):
     Salon.objects.create(
         name=fake.company(),
         address=fake.address(),
@@ -21,8 +21,11 @@ for _ in range(5):
         closing_time="20:00:00"
     )
 
-for _ in range(10):
-    Specialist.objects.create(name=fake.name(),)
+for _ in range(5):
+    Specialist.objects.create(
+        name=fake.first_name(),
+        phone=fake.phone_number()
+    )
 
 
 print("Случайные данные сгенерированы.")

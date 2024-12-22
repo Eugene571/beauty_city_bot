@@ -6,14 +6,14 @@ admin.site.register(Schedule)
 
 @admin.register(Procedure)
 class ProcedureAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price')
-    search_fields = ('name', 'price')
+    list_display = ('name', 'price', 'id')
+    search_fields = ('name', 'price', 'id')
 
 
 @admin.register(Specialist)
 class SpecialistAdmin(admin.ModelAdmin):
-    list_display = ('name', 'specialization', 'phone')
-    search_fields = ('name', 'specialization', 'phone')
+    list_display = ('name', 'specialization', 'phone', 'id')
+    search_fields = ('name', 'specialization', 'phone', 'id')
 
 
 @admin.register(Salon)

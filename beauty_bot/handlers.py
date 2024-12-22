@@ -1,5 +1,6 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-
+from bot.models import Procedure
+from datetime import datetime
 from keyboards import (
     get_main_menu_keyboard,
     get_salon_keyboard,
@@ -97,12 +98,10 @@ def button_handler(update, context):
         reply_markup = get_procedure_keyboard()
         context.bot.send_message(chat_id=chat_id, text=message, reply_markup=reply_markup)
 
-
-
     elif query.data.startswith("procedure_"):
-        procedure_id = query.data.split("_")[1]
+        procedure_id = query.data.split("_")
         USER_DATA[chat_id]["procedure"] = procedure_id
-        procedure_name = PROCEDURE_TRANSLATIONS.get(procedure_id, "Неизвестная процедура")
+        procedure_name = Procedure.objects.get(id=procedure_id[-1])
         message = f"Вы выбрали процедуру '{procedure_name}'. Что хотите сделать дальше?"
         keyboard = [
             [InlineKeyboardButton("✏️ Хочу записаться на удобное время", callback_data="choose_time")],
@@ -129,17 +128,18 @@ def button_handler(update, context):
         context.bot.send_message(chat_id=chat_id, text=message, reply_markup=reply_markup)
 
     elif query.data.startswith("master_"):
-        master_id = query.data.split("_")[1]
+        master_id = query.data.split("_")
         USER_DATA[chat_id]["master"] = master_id
         message = "Вы выбрали мастера. Теперь выберите процедуру:"
         reply_markup = get_procedure_keyboard()
         context.bot.send_message(chat_id=chat_id, text=message, reply_markup=reply_markup)
 
     elif query.data.startswith("date_"):
-        date = query.data.split("_")[1]
+        raw_date = query.data.split("_")[1]
+        date = datetime.strptime(raw_date, "%Y-%m-%d").date()
         USER_DATA[chat_id]["date"] = date
         message = "Выберите время для записи:"
-        reply_markup = get_time_slots_keyboard()
+        reply_markup = get_time_slots_keyboard(chat_id)
         context.bot.send_message(chat_id=chat_id, text=message, reply_markup=reply_markup)
 
     elif query.data.startswith("time_"):

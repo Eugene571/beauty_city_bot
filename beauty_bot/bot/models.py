@@ -8,6 +8,7 @@ class Specialist(models.Model):
     phone = models.CharField(max_length=20, blank=True, verbose_name="Телефон")
     email = models.EmailField(blank=True, verbose_name="Электронная почта")
     procedures = models.ManyToManyField('Procedure', blank=True, related_name="specialists", verbose_name="Процедуры")
+    id = models.AutoField(primary_key=True, verbose_name='Персональный код мастера')
 
     class Meta:
         verbose_name = "Мастер"
@@ -20,6 +21,7 @@ class Specialist(models.Model):
 class Procedure(models.Model):
     name = models.CharField(max_length=100, verbose_name="Название процедуры")
     price = models.FloatField(verbose_name="Цена")
+    id = models.AutoField(primary_key=True, verbose_name='Код процедуры')
 
     class Meta:
         verbose_name = "Процедура"
