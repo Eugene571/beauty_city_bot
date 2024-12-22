@@ -29,11 +29,15 @@ def get_date_keyboard():
     today = datetime.datetime.now()
     end_date = today + datetime.timedelta(days=4)
     dates = [today + datetime.timedelta(days=x) for x in range((end_date - today).days + 1)]
-    formatted_dates = [date.strftime('%d-%m-%Y') for date in dates]
-    k = 1
-    for date in formatted_dates:
-        keyboard.append([InlineKeyboardButton(f"{date} ", callback_data=f"date_{k}")])
-        k += 1
+
+    for date in dates:
+        formatted_date = date.strftime('%Y-%m-%d')  # Форматируем дату для использования в callback_data
+        keyboard.append([
+            InlineKeyboardButton(
+                text=date.strftime('%d-%m-%Y'),  # Отображаемая дата для пользователя
+                callback_data=f"date_{formatted_date}"  # Передаём фактическую дату в callback_data
+            )
+        ])
     return InlineKeyboardMarkup(keyboard)
 
 
@@ -67,32 +71,40 @@ def get_time_slots_keyboard(chat_id):
 
         # Получаем дату и преобразуем её в объект date
         raw_date = USER_DATA[chat_id].get('date')
-        date = datetime.strptime(raw_date, "%Y-%m-%d").date()
+        if not raw_date:
+            print(f"Ошибка: дата отсутствует в USER_DATA для chat_id {chat_id}")
+            return InlineKeyboardMarkup([])
+
+        date = datetime.datetime.strptime(raw_date, "%Y-%m-%d").date()
 
         # Проверяем доступные временные интервалы
-        is_available = is_free_time(specialist, date)  # Должна возвращать словарь {время: доступно/нет}
+        is_available = is_free_time(specialist, date)
+        print(f"Доступные временные интервалы для {specialist.name} на {date}: {is_available}")
 
         # Создаем кнопки для свободных временных интервалов
         keyboard = []
         for time_interval, available in is_available.items():
-            if available:  # Если время доступно
+            if available:
+                # Преобразуем time_interval в строку формата HH:MM
+                time_str = time_interval.strftime("%H:%M")
+                callback_data = f"time_{raw_date}_{time_str}"  # Передаём дату и время
                 keyboard.append([
                     InlineKeyboardButton(
-                        text=f"{time_interval}",
-                        callback_data=f"time_{time_interval}"
+                        text=f"{time_str}",
+                        callback_data=callback_data
                     )
                 ])
 
-        # Возвращаем объект клавиатуры
+        if not keyboard:
+            print("Нет доступных временных интервалов.")
+            return InlineKeyboardMarkup([])
+
+        # Возвращаем клавиатуру
         return InlineKeyboardMarkup(keyboard)
 
-    except ValueError as e:
-        print(f"Ошибка преобразования даты: {e}")
-    except Specialist.DoesNotExist:
-        print(f"Мастер с id {specialist_id} не найден.")
     except Exception as e:
-        print(f"Неизвестная ошибка: {e}")
-    return InlineKeyboardMarkup([[]])  # Возвращаем пустую клавиатуру в случае ошибки
+        print(f"Ошибка в get_time_slots_keyboard: {e}")
+        return InlineKeyboardMarkup([])
 
 
 def get_confirm_keyboard():

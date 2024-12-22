@@ -117,10 +117,18 @@ def button_handler(update, context):
         context.bot.send_message(chat_id=chat_id, text=message, reply_markup=reply_markup)
 
     elif query.data.startswith("time_"):
-        time_slot = query.data.split("_")[1]
-        USER_DATA[chat_id]["time"] = time_slot
-        message = "Введите ваш номер телефона для подтверждения записи."
-        context.bot.send_message(chat_id=chat_id, text=message)
+        try:
+            # Извлекаем дату и время из callback_data
+            _, raw_date, raw_time = query.data.split("_")
+            USER_DATA[chat_id]["date"] = raw_date
+            USER_DATA[chat_id]["time"] = raw_time
+
+            # Сообщение с подтверждением времени
+            message = f"Вы выбрали дату {raw_date} и время {raw_time}. Введите ваш номер телефона для подтверждения записи."
+            context.bot.send_message(chat_id=chat_id, text=message)
+        except ValueError as e:
+            context.bot.send_message(chat_id=chat_id, text="Произошла ошибка при выборе времени. Попробуйте снова.")
+            print(f"Ошибка обработки времени: {e}")
 
     elif query.data == "master":
         message = "Выберите мастера:"
@@ -135,18 +143,13 @@ def button_handler(update, context):
         context.bot.send_message(chat_id=chat_id, text=message, reply_markup=reply_markup)
 
     elif query.data.startswith("date_"):
-        raw_date = query.data.split("_")[1]
-        date = datetime.strptime(raw_date, "%Y-%m-%d").date()
-        USER_DATA[chat_id]["date"] = date
-        message = "Выберите время для записи:"
-        reply_markup = get_time_slots_keyboard(chat_id)
+        # Извлекаем выбранную дату
+        raw_date = query.data.split("_")[1]  # Получаем дату из callback_data
+        USER_DATA[chat_id]["date"] = raw_date  # Сохраняем дату как строку в формате 'YYYY-MM-DD'
+        # Предлагаем выбрать время
+        message = f"Вы выбрали дату: {raw_date}. Теперь выберите удобное время:"
+        reply_markup = get_time_slots_keyboard(chat_id)  # Генерация клавиатуры для времени
         context.bot.send_message(chat_id=chat_id, text=message, reply_markup=reply_markup)
-
-    elif query.data.startswith("time_"):
-        time_slot = query.data.split("_")[1]
-        USER_DATA[chat_id]["time"] = time_slot
-        message = "Введите ваш номер телефона для подтверждения записи."
-        context.bot.send_message(chat_id=chat_id, text=message)
 
     elif query.data == "call_admin":
         message = "Вы можете позвонить нашему менеджеру по номеру:\n +7 (123) 456-78-90"

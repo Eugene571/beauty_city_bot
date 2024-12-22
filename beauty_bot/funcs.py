@@ -8,13 +8,14 @@ from bot.models import Schedule, Specialist
 
 
 def is_free_time(specialist, date):
-    time_intervals = [time(hour, 0) for hour in range(10, 20)]
+    time_intervals = [time(hour, 0) for hour in range(10, 19)]  # Временные интервалы с 10 до 18
     schedules = Schedule.objects.filter(specialist=specialist, date=date)
-    availability = {interval: False for interval in time_intervals}
+    availability = {interval: True for interval in time_intervals}  # По умолчанию все интервалы свободны
+
     for schedule in schedules:
         for interval in time_intervals:
             if schedule.start_time <= interval < schedule.end_time:
-                availability[interval] = True
+                availability[interval] = False  # Если время занято, ставим False
 
     return availability
 
