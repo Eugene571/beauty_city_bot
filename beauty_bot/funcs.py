@@ -4,12 +4,12 @@ import django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'beauty_bot.settings')
 django.setup()
 from datetime import time
-from bot.models import Schedule, Specialist
+from bot.models import Schedule, Specialist, Appointment
 
 
 def is_free_time(specialist, date):
     time_intervals = [time(hour, 0) for hour in range(10, 19)]  # Временные интервалы с 10 до 18
-    schedules = Schedule.objects.filter(specialist=specialist, date=date)
+    schedules = Appointment.objects.filter(specialist=specialist, date=date)
     availability = {interval: True for interval in time_intervals}  # По умолчанию все интервалы свободны
 
     for schedule in schedules:

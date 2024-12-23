@@ -5,7 +5,6 @@ import datetime
 from datetime import time
 
 
-
 def get_main_menu_keyboard():
     keyboard = [
         [InlineKeyboardButton("📝  Записаться через салон  ", callback_data="salon")],
@@ -64,25 +63,48 @@ def get_procedure_keyboard():
 
 def get_time_slots_keyboard(chat_id):
     from handlers import USER_DATA
+    keyboard = []
     try:
-        # Получаем мастера из базы данных
-        specialist_id = USER_DATA[chat_id].get('master', [])[-1]
-        specialist = Specialist.objects.get(id=specialist_id)
-
-        # Получаем дату и преобразуем её в объект date
         raw_date = USER_DATA[chat_id].get('date')
         if not raw_date:
             print(f"Ошибка: дата отсутствует в USER_DATA для chat_id {chat_id}")
             return InlineKeyboardMarkup([])
 
-        date = datetime.datetime.strptime(raw_date, "%Y-%m-%d").date()
+        # Получаем идентификатор мастера и дату из USER_DATA
+        specialist_id = USER_DATA[chat_id].get('master')
+        if not specialist_id:
+            print(f"Ошибка: идентификатор мастера отсутствует для chat_id {chat_id}. ")
+            time_intervals = [time(hour, 0) for hour in range(10, 19)]
+            for time_interval in time_intervals:
+                time_str = time_interval.strftime("%H:%M")
+                callback_data = f"time_{raw_date}_{time_str}"  # Передаём дату и время
+                keyboard.append([
+                    InlineKeyboardButton(
+                        text=f"{time_str}",
+                        callback_data=callback_data
+                    )
+                ])
+            return InlineKeyboardMarkup(keyboard)
+
+        # Проверяем, что идентификатор мастера корректный
+        try:
+            specialist = Specialist.objects.get(id=int(specialist_id))
+        except (Specialist.DoesNotExist, ValueError):
+            print(f"Ошибка: мастер с id {specialist_id} не найден.")
+            return InlineKeyboardMarkup([])
+
+        # Преобразуем дату в объект date
+        try:
+            date = datetime.datetime.strptime(raw_date, "%Y-%m-%d").date()
+        except ValueError:
+            print(f"Ошибка: некорректный формат даты {raw_date} для chat_id {chat_id}")
+            return InlineKeyboardMarkup([])
 
         # Проверяем доступные временные интервалы
         is_available = is_free_time(specialist, date)
         print(f"Доступные временные интервалы для {specialist.name} на {date}: {is_available}")
 
         # Создаем кнопки для свободных временных интервалов
-        keyboard = []
         for time_interval, available in is_available.items():
             if available:
                 # Преобразуем time_interval в строку формата HH:MM

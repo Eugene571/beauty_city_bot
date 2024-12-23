@@ -113,3 +113,22 @@ class Booking(models.Model):
 
     def __str__(self):
         return f"{self.procedure} для {self.client} ({self.schedule.date})"
+
+
+class Appointment(models.Model):
+    salon = models.ForeignKey(Salon, on_delete=models.CASCADE, related_name='appointments', null=True, blank=True)
+    specialist = models.ForeignKey(Specialist, on_delete=models.CASCADE, related_name='appointments', null=True)
+    procedure = models.ForeignKey(Procedure, on_delete=models.CASCADE, related_name='appointments')
+    date = models.DateField()
+    time = models.TimeField()
+    client_name = models.CharField(max_length=100)
+    client_phone = models.CharField(max_length=15)
+#   start_time = models.TimeField(verbose_name="Время начала")
+#   end_time = models.TimeField(verbose_name="Время окончания")
+    # нужно добавить старт и энд для работы функции is_free_time
+
+    class Meta:
+        unique_together = ('specialist', 'date', 'time')
+
+    def __str__(self):
+        return f"{self.client_name} ({self.procedure.name})"

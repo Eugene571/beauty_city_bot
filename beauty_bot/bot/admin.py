@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Salon, Schedule, Specialist, Client, Booking, Procedure
+from .models import Salon, Schedule, Specialist, Client, Booking, Procedure, Appointment
 
 admin.site.register(Schedule)
 
@@ -33,3 +33,8 @@ class BookingAdmin(admin.ModelAdmin):
     list_display = ('client', 'schedule', 'procedure', 'status', 'payment_status', 'created_at')
     list_filter = ('status', 'payment_status', 'schedule__date')
     search_fields = ('client__name', 'client__phone_number')
+
+
+@admin.register(Appointment)
+class AppointmentAdmin(admin.ModelAdmin):
+    list_display = ('salon', 'specialist', 'procedure', 'client_name', 'client_phone', 'date', 'time')
