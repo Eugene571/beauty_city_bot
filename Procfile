@@ -1,1 +1,1 @@
-worker: python run_bot.py
+worker: python beauty_bot/run_bot.py
