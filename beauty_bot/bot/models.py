@@ -38,6 +38,7 @@ class Salon(models.Model):
     email = models.EmailField(verbose_name="Электронная почта", blank=True, null=True)
     opening_time = models.TimeField(verbose_name="Время открытия")
     closing_time = models.TimeField(verbose_name="Время закрытия")
+    id = models.AutoField(primary_key=True, verbose_name='Код салона')
 
     class Meta:
         verbose_name = "Салон"
@@ -123,8 +124,8 @@ class Appointment(models.Model):
     time = models.TimeField()
     client_name = models.CharField(max_length=100)
     client_phone = models.CharField(max_length=15)
-#   start_time = models.TimeField(verbose_name="Время начала")
-#   end_time = models.TimeField(verbose_name="Время окончания")
+    start_time = models.TimeField(verbose_name="Время начала",)
+    end_time = models.TimeField(verbose_name="Время окончания",)
     # нужно добавить старт и энд для работы функции is_free_time
 
     class Meta:

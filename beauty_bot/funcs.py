@@ -14,7 +14,9 @@ def is_free_time(specialist, date):
 
     for schedule in schedules:
         for interval in time_intervals:
-            if schedule.start_time <= interval < schedule.end_time:
+            if schedule is None:
+                pass
+            elif schedule.start_time <= interval < schedule.end_time:
                 availability[interval] = False  # Если время занято, ставим False
 
     return availability

@@ -1,6 +1,7 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from bot.models import Procedure, Appointment
 from datetime import datetime
+from datetime import timedelta
 from keyboards import (
     get_main_menu_keyboard,
     get_salon_keyboard,
@@ -13,10 +14,11 @@ from keyboards import (
 USER_DATA = {}
 
 
-def format_procedure_prices(prices):
+def format_procedure_prices():
+    procedures = Procedure.objects.all()
     message = "Цены на процедуры:\n\n"
-    for procedure, price in prices.items():
-        message += f"- {procedure}: {price} рублей\n"
+    for procedure in procedures:
+        message += f"- 🌺{procedure.name}: {procedure.price} рублей\n"
     return message.strip()
 
 
@@ -32,7 +34,7 @@ def button_handler(update, context):
         context.bot.send_message(chat_id=chat_id, text=message, reply_markup=reply_markup)
 
     elif query.data == "show_prices":
-        message = format_procedure_prices(PROCEDURE_PRICES)
+        message = format_procedure_prices()
         context.bot.send_message(chat_id=chat_id, text=message)
 
     elif query.data == "disagree":
@@ -79,11 +81,18 @@ def button_handler(update, context):
         context.bot.send_message(chat_id=chat_id, text=message, reply_markup=reply_markup)
 
     elif query.data.startswith("time_"):
+
         try:
             # Извлекаем дату и время из callback_data
             _, raw_date, raw_time = query.data.split("_")
             USER_DATA[chat_id]["date"] = raw_date
-            USER_DATA[chat_id]["time"] = raw_time
+            # Преобразуем строку времени в объект time
+            time_obj = datetime.strptime(raw_time, "%H:%M").time()
+            USER_DATA[chat_id]["time"] = time_obj
+            USER_DATA[chat_id]["start_time"] = time_obj
+            # Вычисляем end_time
+            end_datetime = datetime.combine(datetime.today(), time_obj) + timedelta(hours=1)
+            USER_DATA[chat_id]["end_time"] = end_datetime.time()
 
             # Сообщение с подтверждением времени
             message = f"Вы выбрали дату {raw_date} и время {raw_time}. Введите ваш номер телефона для подтверждения записи."
@@ -129,14 +138,19 @@ def phone_handler(update, context):
     procedure_id = USER_DATA[chat_id].get("procedure")
     date = USER_DATA[chat_id].get("date")
     time = USER_DATA[chat_id].get("time")
+    start_time = USER_DATA[chat_id].get("start_time")
+    end_time = USER_DATA[chat_id].get("end_time")
 
     appointment = Appointment.objects.create(
+        salon_id=salon_id,
         specialist_id=specialist_id,
         procedure_id=procedure_id,
         date=date,
         time=time,
         client_name=update.message.chat.first_name,
-        client_phone=phone
+        client_phone=phone,
+        start_time=start_time,
+        end_time=end_time
     )
 
     context.bot.send_message(chat_id=chat_id, text="✅ Спасибо! Ваша запись подтверждена.")

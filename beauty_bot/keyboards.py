@@ -1,5 +1,5 @@
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from bot.models import Specialist, Procedure
+from bot.models import Specialist, Procedure, Appointment, Salon
 from funcs import is_free_time
 import datetime
 from datetime import time
@@ -41,15 +41,10 @@ def get_date_keyboard():
 
 
 def get_salon_keyboard():
-    keyboard = [
-        [InlineKeyboardButton("‍🏠 Салон 'Челка' ", callback_data="salon_1"),
-         InlineKeyboardButton("🏠 Салон 'Стиляга' ", callback_data="salon_2"),
-         InlineKeyboardButton("🏠 Салон 'Гармония' ", callback_data="salon_3")],
-        [InlineKeyboardButton("🏠 Салон 'Элеганс' ", callback_data="salon_4"),
-         InlineKeyboardButton("🏠 Салон 'Краса' ", callback_data="salon_5"),
-         InlineKeyboardButton("🏠 Салон 'Стиль' ", callback_data="salon_6")]
-
-    ]
+    salons = Salon.objects.all()
+    keyboard = []
+    for salon in salons:
+        keyboard.append([InlineKeyboardButton(f"🏠{salon.name} ", callback_data=f"salon_{salon.id}")])
     return InlineKeyboardMarkup(keyboard)
 
 

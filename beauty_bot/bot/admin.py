@@ -37,4 +37,12 @@ class BookingAdmin(admin.ModelAdmin):
 
 @admin.register(Appointment)
 class AppointmentAdmin(admin.ModelAdmin):
-    list_display = ('salon', 'specialist', 'procedure', 'client_name', 'client_phone', 'date', 'time')
+    list_display = ('salon',
+                    'specialist',
+                    'procedure',
+                    'client_name',
+                    'client_phone',
+                    'date',
+                    'time',
+                    'start_time',
+                    'end_time')
