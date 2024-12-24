@@ -1,8 +1,9 @@
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from bot.models import Specialist, Procedure, Appointment, Salon
-from funcs import is_free_time
 import datetime
-from datetime import time
+
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+from bot.models import Specialist, Procedure, Salon
+from funcs import is_free_time
 
 
 def get_main_menu_keyboard():
@@ -10,7 +11,6 @@ def get_main_menu_keyboard():
         [InlineKeyboardButton("📝  Записаться через салон  ", callback_data="salon")],
         [InlineKeyboardButton("🖊️  Записаться через мастера", callback_data="master")],
         [InlineKeyboardButton("📞 Позвонить администратору", callback_data="call_admin")],
-
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -65,58 +65,59 @@ def get_time_slots_keyboard(chat_id):
             print(f"Ошибка: дата отсутствует в USER_DATA для chat_id {chat_id}")
             return InlineKeyboardMarkup([])
 
-        # Получаем идентификатор мастера и дату из USER_DATA
+        # Получаем идентификатор салона и мастера из USER_DATA
+        salon_id = USER_DATA[chat_id].get('salon')
         specialist_id = USER_DATA[chat_id].get('master')
-        if not specialist_id:
-            print(f"Ошибка: идентификатор мастера отсутствует для chat_id {chat_id}. ")
-            time_intervals = [time(hour, 0) for hour in range(10, 19)]
-            for time_interval in time_intervals:
-                time_str = time_interval.strftime("%H:%M")
-                callback_data = f"time_{raw_date}_{time_str}"  # Передаём дату и время
-                keyboard.append([
-                    InlineKeyboardButton(
-                        text=f"{time_str}",
-                        callback_data=callback_data
-                    )
-                ])
-            return InlineKeyboardMarkup(keyboard)
 
-        # Проверяем, что идентификатор мастера корректный
-        try:
-            specialist = Specialist.objects.get(id=int(specialist_id))
-        except (Specialist.DoesNotExist, ValueError):
-            print(f"Ошибка: мастер с id {specialist_id} не найден.")
-            return InlineKeyboardMarkup([])
+        # Если указан только салон
+        if salon_id:
+            try:
+                salon = Salon.objects.get(id=int(salon_id))
+            except Salon.DoesNotExist:
+                print(f"Ошибка: салон с id {salon_id} не найден.")
+                return InlineKeyboardMarkup([])
 
-        # Преобразуем дату в объект date
-        try:
+            # Преобразуем дату в объект date
             date = datetime.datetime.strptime(raw_date, "%Y-%m-%d").date()
-        except ValueError:
-            print(f"Ошибка: некорректный формат даты {raw_date} для chat_id {chat_id}")
-            return InlineKeyboardMarkup([])
 
-        # Проверяем доступные временные интервалы
-        is_available = is_free_time(specialist, date)
-        print(f"Доступные временные интервалы для {specialist.name} на {date}: {is_available}")
+            # Проверяем доступные временные интервалы для салона
+            is_available = is_free_time(entity_type="salon", entity_id=salon.id, date=date)  # Проверка для салона
+            print(f"Доступные временные интервалы для {salon.name} на {date}: {is_available}")
 
-        # Создаем кнопки для свободных временных интервалов
-        for time_interval, available in is_available.items():
-            if available:
-                # Преобразуем time_interval в строку формата HH:MM
-                time_str = time_interval.strftime("%H:%M")
-                callback_data = f"time_{raw_date}_{time_str}"  # Передаём дату и время
-                keyboard.append([
-                    InlineKeyboardButton(
-                        text=f"{time_str}",
-                        callback_data=callback_data
-                    )
-                ])
+            # Добавляем кнопки для свободных временных интервалов
+            for time_interval, available in is_available.items():
+                if available:
+                    time_str = time_interval.strftime("%H:%M")
+                    callback_data = f"time_{raw_date}_{time_str}"  # Передаём дату и время
+                    keyboard.append([InlineKeyboardButton(text=f"{time_str}", callback_data=callback_data)])
+
+        # Если указан только мастер
+        if specialist_id:
+            try:
+                specialist = Specialist.objects.get(id=int(specialist_id))
+            except Specialist.DoesNotExist:
+                print(f"Ошибка: мастер с id {specialist_id} не найден.")
+                return InlineKeyboardMarkup([])
+
+            # Преобразуем дату в объект date
+            date = datetime.datetime.strptime(raw_date, "%Y-%m-%d").date()
+
+            # Проверяем доступные временные интервалы для мастера
+            is_available = is_free_time(entity_type="master", entity_id=specialist.id,
+                                        date=date)  # Проверка для мастера
+            print(f"Доступные временные интервалы для {specialist.name} на {date}: {is_available}")
+
+            # Добавляем кнопки для свободных временных интервалов
+            for time_interval, available in is_available.items():
+                if available:
+                    time_str = time_interval.strftime("%H:%M")
+                    callback_data = f"time_{raw_date}_{time_str}"  # Передаём дату и время
+                    keyboard.append([InlineKeyboardButton(text=f"{time_str}", callback_data=callback_data)])
 
         if not keyboard:
             print("Нет доступных временных интервалов.")
             return InlineKeyboardMarkup([])
 
-        # Возвращаем клавиатуру
         return InlineKeyboardMarkup(keyboard)
 
     except Exception as e:
