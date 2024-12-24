@@ -48,27 +48,6 @@ class Salon(models.Model):
         return self.name
 
 
-class Schedule(models.Model):
-    salon = models.ForeignKey(Salon, on_delete=models.CASCADE, verbose_name="Салон", related_name="schedules")
-    specialist = models.ForeignKey('Specialist', on_delete=models.CASCADE, verbose_name="Специалист",
-                                    related_name="schedules")
-    date = models.DateField(verbose_name="Дата")
-    start_time = models.TimeField(verbose_name="Время начала")
-    end_time = models.TimeField(verbose_name="Время окончания")
-
-    class Meta:
-        verbose_name = "Расписание"
-        verbose_name_plural = "Расписания"
-        unique_together = ('specialist', 'date', 'start_time')
-
-    def __str__(self):
-        return f"{self.specialist} - {self.date} ({self.start_time} - {self.end_time})"
-
-    def clean(self):
-        if self.end_time <= self.start_time:
-            raise ValidationError("Время окончания должно быть позже времени начала.")
-
-
 class Client(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True, verbose_name="Имя клиента")
     phone_number = models.CharField(max_length=20, unique=True, verbose_name="Номер телефона")
@@ -87,8 +66,6 @@ class Client(models.Model):
 
 class Booking(models.Model):
     client = models.ForeignKey('Client', on_delete=models.CASCADE, related_name='bookings', verbose_name="Клиент")
-    schedule = models.ForeignKey('Schedule', on_delete=models.CASCADE, related_name='bookings',
-                                 verbose_name="Расписание")
     procedure = models.ForeignKey('Procedure', on_delete=models.CASCADE, related_name='bookings',
                                   verbose_name="Процедура")
     status = models.CharField(
@@ -110,7 +87,7 @@ class Booking(models.Model):
     class Meta:
         verbose_name = "Запись"
         verbose_name_plural = "Записи"
-        unique_together = ('schedule', 'procedure', 'client')
+        unique_together = ('procedure', 'client')
 
     def __str__(self):
         return f"{self.procedure} для {self.client} ({self.schedule.date})"

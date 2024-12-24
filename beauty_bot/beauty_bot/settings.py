@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure-cd^$&j5d254z0pyx(r$3k+ety-(c*qyses!a3%*$*yxoap0xr3
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -39,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bot',
 ]
+CSRF_TRUSTED_ORIGINS = ['https://7696-94-188-115-42.ngrok-free.app', 'http://localhost:8000']
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -116,7 +118,16 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+# URL для доступа к статическим файлам
+STATIC_URL = '/static/'
+
+# Папка, куда будут собираться все статические файлы после команды collectstatic
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Папки, в которых Django будет искать статические файлы
+STATICFILES_DIRS = [
+    os.path.join('C:', 'Users', 'eugen', 'PycharmProjects', 'beauty_city_bot', 'beauty_city_bot', 'beauty_bot', 'staticfiles'),
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
