@@ -60,7 +60,8 @@ Telegram-бот для записи на процедуры в салонах к
 
 Используйте админку Django и войдите с учетными данными суперпользователя для управления cервиса BeautyCity.
    
-![Результат](https://i.postimg.cc/KzL0rSsk/admin.jpg) 
+![25-12-2024-211659](https://github.com/user-attachments/assets/c8d3fa61-6a6c-4246-b4bb-6b70d77f5046)
+
    
    
 ## ✅ Цели проекта
